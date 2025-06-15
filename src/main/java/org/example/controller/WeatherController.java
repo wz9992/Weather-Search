@@ -18,9 +18,14 @@ public class WeatherController {
         this.weatherService = weatherService;
     }
 
-    @PostMapping
-    public ResponseEntity<?>
-    getWeather(@RequestParam String city) throws WeatherServiceException {
+    @GetMapping
+    public ResponseEntity<?> getWeatherGet(@RequestParam String city) throws WeatherServiceException {
+        WeatherDTO weather = weatherService.getWeather(city);
+        return ResponseEntity.ok(weather);
+    }
+
+    @PostMapping(consumes = "application/x-www-form-urlencoded")
+    public ResponseEntity<?> getWeatherPost(@RequestParam String city) throws WeatherServiceException {
         WeatherDTO weather = weatherService.getWeather(city);
         return ResponseEntity.ok(weather);
     }

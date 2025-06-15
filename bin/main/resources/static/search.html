@@ -62,47 +62,49 @@
         const resultDiv = document.getElementById('result');
 
         if (!city) {
-            resultDiv.innerHTML = '<div style="color: red">input city name</div>';
+            resultDiv.innerHTML = '<div style="color: red">Please input city name</div>';
             return;
         }
 
-        resultDiv.innerHTML = 'loading...';
+        resultDiv.innerHTML = 'Loading...';
 
-        fetch('/weather', {
-            method: 'POST',
+        fetch(`/weather?city=${encodeURIComponent(city)}`, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `city=${encodeURIComponent(city)}`
+                'Accept': 'application/json'
+            }
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                displayWeather(data);
-            })
-            .catch(error => {
-                resultDiv.innerHTML = `<div style="color: red">error: ${error.message}</div>`;
-            });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            displayWeather(data);
+        })
+        .catch(error => {
+            resultDiv.innerHTML = `<div style="color: red">Error: ${error.message}</div>`;
+        });
     }
 
     function displayWeather(weatherData) {
         const resultDiv = document.getElementById('result');
 
         const html = `
-                <div class="weather-item">
-                    <h3>
-                        ${weatherData.city} Weather
-                        <img src="${weatherData.iconUrl}"/>
-                    </h3>
-                    <p>Temperature: ${weatherData.temperature}°C</p>
-                    <p>Humidity: ${weatherData.humidity}%</p>
-                    <p>Description:${weatherData.description}</p>
-                </div>
-            `;
+            <div class="weather-item">
+                <h3>
+                    ${weatherData.city} Weather
+                    <img src="${weatherData.iconUrl}" alt="weather icon"/>
+                </h3>
+                <p>Temperature: ${weatherData.temperature}°C</p>
+                <p>Humidity: ${weatherData.humidity}%</p>
+                <p>Description: ${weatherData.description}</p>
+            </div>
+        `;
 
         resultDiv.innerHTML = html;
     }
