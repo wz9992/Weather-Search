@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Forecast</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .weather-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e6f3ff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Weather Forecast</h1>
+    <div>
+        <input type="text" id="cityInput" placeholder="input city name">
+        <button onclick="getWeather()">search</button>
+    </div>
+    <div id="result"></div>
+</div>
+
+<script>
+    function getWeather() {
+        const city = document.getElementById('cityInput').value;
+        const resultDiv = document.getElementById('result');
+
+        if (!city) {
+            resultDiv.innerHTML = '<div style="color: red">input city name</div>';
+            return;
+        }
+
+        resultDiv.innerHTML = 'loading...';
+
+        fetch('/weather', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `city=${encodeURIComponent(city)}`
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayWeather(data);
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<div style="color: red">error: ${error.message}</div>`;
+            });
+    }
+
+    function displayWeather(weatherData) {
+        const resultDiv = document.getElementById('result');
+
+        const html = `
+                <div class="weather-item">
+                    <h3>
+                        ${weatherData.city} Weather
+                        <img src="${weatherData.iconUrl}"/>
+                    </h3>
+                    <p>Temperature: ${weatherData.temperature}°C</p>
+                    <p>Humidity: ${weatherData.humidity}%</p>
+                    <p>Description:${weatherData.description}</p>
+                </div>
+            `;
+
+        resultDiv.innerHTML = html;
+    }
+</script>
+</body>
+</html>
